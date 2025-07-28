@@ -1,6 +1,6 @@
 import streamlit as st
 
-from data_loader import DatasetLoader
+from data_loader import DatasetLoader, load_player_data
 from player_selector import PlayerSelector
 from stats_processor import StatsProcessor
 from chart_plotter import RadarChartPlotter
@@ -20,7 +20,7 @@ class PlayerComparisonApp:
 
         dataset_path = self.dataset_loader.get_dataset_path(league)
         try:
-            players_df = self.dataset_loader.load_player_data(dataset_path)
+            players_df = load_player_data(dataset_path)  # <-- call cached function directly here
         except Exception as e:
             st.error(f"Failed to load data file: {e}")
             st.stop()
