@@ -13,58 +13,64 @@ class PlayerComparisonApp:
         st.title("🎈 Player Comparison App")
 
         # Create two columns: left for all filters, right for chart
-        col1, col_empty, col2 = st.columns([1, 0.2, 3])  # 0.2 is the width of the empty column
+        col1, col2, col3 = st.columns([1, 1, 1])
 
         with col1:
-            # All your filters here
+            st.header("Player 1 Filters")
             years = ["24-25"]
-            year = st.selectbox("Select year:", years)
+            year1 = st.selectbox("Select year (Player 1):", years, key="year1")
 
-            leagues = self.dataset_loader.get_leagues()
-            league = st.selectbox("Select league:", leagues)
+            leagues1 = self.dataset_loader.get_leagues()
+            league1 = st.selectbox("Select league (Player 1):", leagues1, key="league1")
 
-            dataset_path = self.dataset_loader.get_dataset_path(league)
-            try:
-                players_df = load_player_data(dataset_path)
-            except Exception as e:
-                st.error(f"Failed to load data file: {e}")
-                st.stop()
+            dataset_path1 = self.dataset_loader.get_dataset_path(league1)
+            players_df1 = load_player_data(dataset_path1)
 
-            st.write(f"Loaded dataset for **{league}** with {len(players_df)} players.")
+            player_names1 = players_df1['Player'].unique()
+            player1_name = st.selectbox("Select player 1:", player_names1, key="player1")
 
-            player_selector = PlayerSelector(players_df)
-            player1_name, player2_name = player_selector.select_players()
+        with col2:
+            st.header("Player 2 Filters")
+            year2 = st.selectbox("Select year (Player 2):", years, key="year2")
 
-            numeric_cols = StatsProcessor(players_df).get_numeric_stats_columns()
+            leagues2 = self.dataset_loader.get_leagues()
+            league2 = st.selectbox("Select league (Player 2):", leagues2, key="league2")
 
-            default_stats = ['Goals', 'Assists', 'xG']
+            dataset_path2 = self.dataset_loader.get_dataset_path(league2)
+            players_df2 = load_player_data(dataset_path2)
+
+            player_names2 = players_df2['Player'].unique()
+            player2_name = st.selectbox("Select player 2:", player_names2, key="player2")
+
+        # Stats multiselect spanning first two columns — use st.columns with 2 equal widths here
+        cols = st.columns(2)
+        stats_processor1 = StatsProcessor(players_df1)
+        numeric_cols = stats_processor1.get_numeric_stats_columns()
+
+        with cols[0]:
             selected_stats = st.multiselect(
                 "Select stats to compare:",
                 options=numeric_cols,
-                default=[s for s in default_stats if s in numeric_cols]
+                default=["Goals", "Assists", "xG"] if set(["Goals", "Assists", "xG"]).issubset(numeric_cols) else []
             )
 
-            if not selected_stats:
-                st.warning("Select at least one stat to show on the chart.")
-
-        with col_empty:
-            print(0)
-            # This column is intentionally left empty to add space
-
-        with col2:
+        # Plot in the 3rd column
+        with col3:
             if selected_stats:
-                player1_data = players_df[players_df['Player'] == player1_name].iloc[0]
-                player2_data = players_df[players_df['Player'] == player2_name].iloc[0]
+                player1_data = players_df1[players_df1['Player'] == player1_name].iloc[0]
+                player2_data = players_df2[players_df2['Player'] == player2_name].iloc[0]
 
-                stats_processor = StatsProcessor(players_df)
-                player1_stats_norm = stats_processor.get_normalized_stats(player1_data, selected_stats)
-                player2_stats_norm = stats_processor.get_normalized_stats(player2_data, selected_stats)
+                player1_stats_norm = stats_processor1.get_normalized_stats(player1_data, selected_stats)
+                stats_processor2 = StatsProcessor(players_df2)
+                player2_stats_norm = stats_processor2.get_normalized_stats(player2_data, selected_stats)
 
                 RadarChartPlotter.plot(
                     [player1_stats_norm, player2_stats_norm],
                     [player1_name, player2_name],
                     selected_stats
                 )
+            else:
+                st.info("Please select at least one stat to display the radar chart.")
 
 
 
