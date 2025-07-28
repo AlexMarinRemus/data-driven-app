@@ -10,8 +10,17 @@ def load_datasets_excel(path="datasets.xlsx"):
     return df
 
 @st.cache_data
-def load_player_data(path):
-    return pd.read_excel(path)
+def load_player_data(path, min_minutes=600):
+    df = pd.read_excel(path)
+    df.columns = [col.strip() for col in df.columns]
+
+    # Filter by "Minutes played"
+    if "Minutes played" in df.columns:
+        df = df[df["Minutes played"] > min_minutes]
+    else:
+        st.warning(f"'Minutes played' column not found in dataset: {path}")
+
+    return df
 
 class DatasetLoader:
     def __init__(self):
