@@ -8,6 +8,16 @@ class PlayerComparisonApp:
     def __init__(self):
         self.dataset_loader = DatasetLoader()
 
+    def get_color(percent):
+        if percent >= 75:
+            return "green"
+        elif percent >= 40:
+            return "yellow"
+        elif percent >= 25:
+            return "orange"
+        else:
+            return "red"
+
     def run(self):
         st.title("Player Comparison App")
 
@@ -74,23 +84,20 @@ class PlayerComparisonApp:
                 selected_stats
             )
         else:
-            st.subheader(f"{player1_name} – Attributes Overview")
-
-            for stat in selected_stats:
+           for stat in selected_stats:
                 raw_value = player1_data[stat]
                 norm_value = player1_stats_norm[stat] * 100
+                color = self.get_color(norm_value)
 
-                if norm_value >= 75:
-                    color = "green"
-                elif norm_value >= 40:
-                    color = "yellow"
-                elif norm_value >= 25:
-                    color = "orange"
-                else:
-                    color = "red"
+                st.markdown(f"**{stat}**: {raw_value} ({norm_value:.0f}%)")
 
-                st.markdown(f"**{stat}**: {raw_value}")
-                st.progress(norm_value / 100, text=f"{norm_value:.0f}%", color=color)
+                st.markdown(f"""
+                    <div style="background-color: #e0e0e0; border-radius: 8px; overflow: hidden; height: 20px; width: 100%; margin-bottom: 10px;">
+                        <div style="width: {norm_value}%; background-color: {color}; height: 100%; text-align: center;">
+                            <span style="color: black; font-size: 14px;">{norm_value:.0f}%</span>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
