@@ -79,13 +79,13 @@ class PlayerComparisonApp:
             player2_stats_norm = stats_processor2.get_normalized_stats(player2_data, selected_stats)
 
             RadarChartPlotter.plot(
-                [player1_stats_norm, player2_stats_norm],
-                [player1_name, player2_name],
-                selected_stats
-            )
+            [player1_stats_norm, player2_stats_norm],
+            [f"{player1_name} ({year1})", f"{player2_name} ({year2})"],
+            selected_stats
+        )
         else:
            st.header(f"🔎 {player1_name} – Attribute Overview")
-           
+
            for stat in selected_stats:
                 raw_value = player1_data[stat]
                 norm_value = player1_stats_norm[stat] * 100
