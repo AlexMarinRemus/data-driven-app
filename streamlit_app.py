@@ -10,10 +10,10 @@ class PlayerComparisonApp:
         self.dataset_loader = DatasetLoader()
 
     def run(self):
-        st.title("🎈 Player Comparison App")
+        st.title("Player Comparison App")
 
         # Create two columns: left for all filters, right for chart
-        col1, col2, col3 = st.columns([1, 1, 4])
+        col1, col2, col3 = st.columns([1, 1, 3])
 
         with col1:
             st.header("Player 1 Filters")
