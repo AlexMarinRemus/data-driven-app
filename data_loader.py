@@ -27,35 +27,38 @@ class DatasetLoader:
         self.datasets_df = load_datasets_excel()
 
     def get_years(self):
-        raw_years = self.datasets_df["YEAR"].dropna().unique()
+        raw_years = self.datasets_df["YEAR"].dropna().astype(str).str.strip().unique()
 
-        cleaned_years = []
-        for y in raw_years:
+        # Sort descending by the starting year part: "24-25" → 24
+        def sort_key(season_str):
             try:
-                cleaned_years.append(int(float(str(y).strip())))
-            except Exception as e:
-                st.warning(f"Skipping invalid year value: {y} ({e})")
+                return int(season_str.split("-")[0])
+            except:
+                return -1  # if malformed, push to bottom
 
-        if not cleaned_years:
-            st.error("No valid years found in dataset metadata.")
-            return []
+        sorted_years = sorted(raw_years, key=sort_key, reverse=True)
+        return sorted_years
 
-        return sorted(set(cleaned_years), reverse=True)
 
 
     def get_leagues_for_year(self, year):
         return self.datasets_df[self.datasets_df["YEAR"] == year]["LEAGUE"].dropna().unique().tolist()
 
     def get_dataset_path(self, league, year):
-        row = self.datasets_df[(self.datasets_df["LEAGUE"] == league) & (self.datasets_df["YEAR"] == year)]
+        row = self.datasets_df[
+            (self.datasets_df["LEAGUE"].str.strip() == league.strip()) &
+            (self.datasets_df["YEAR"].astype(str).str.strip() == str(year).strip())
+        ]
+
         if row.empty:
             raise ValueError(f"No dataset path found for league '{league}' and year '{year}'")
-        
+
         path_value = row.iloc[0]["PATH"]
         if not isinstance(path_value, str):
             raise TypeError(f"Expected string for path, got {type(path_value)}: {path_value}")
 
         return os.path.join("datasets", path_value)
+
 
     def get_metadata(self):
         return self.datasets_df.copy()
