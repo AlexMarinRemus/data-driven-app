@@ -1,108 +1,54 @@
 import streamlit as st
-import pandas as pd
-import os
-import matplotlib.pyplot as plt
-import numpy as np
 
-# --- Helper function to plot radar chart ---
-def plot_radar_chart(player_stats, player_names, stats_labels):
-    num_vars = len(stats_labels)
+from data_loader import DatasetLoader
+from player_selector import PlayerSelector
+from stats_processor import StatsProcessor
+from chart_plotter import RadarChartPlotter
 
-    angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
-    angles += angles[:1]
+class PlayerComparisonApp:
+    def __init__(self):
+        self.dataset_loader = DatasetLoader()
 
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    def run(self):
+        st.title("🎈 Player Comparison App")
 
-    for i, player in enumerate(player_names):
-        values = player_stats[i].tolist()
-        values += values[:1]
-        ax.plot(angles, values, label=player)
-        ax.fill(angles, values, alpha=0.25)
+        years = ["24-25"]
+        year = st.selectbox("Select year:", years)
 
-    ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(stats_labels)
-    ax.set_yticklabels([])
-    ax.set_title("Player Comparison Radar Chart")
-    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+        leagues = self.dataset_loader.get_leagues()
+        league = st.selectbox("Select league:", leagues)
 
-    st.pyplot(fig)
+        dataset_path = self.dataset_loader.get_dataset_path(league)
+        try:
+            players_df = self.dataset_loader.load_player_data(dataset_path)
+        except Exception as e:
+            st.error(f"Failed to load data file: {e}")
+            st.stop()
 
-# --- Load datasets.csv ---
-@st.cache_data
-def load_datasets():
-    df = pd.read_csv("datasets.csv", delimiter=';')
-    return df
+        st.write(f"Loaded dataset for **{league}** with {len(players_df)} players.")
 
-datasets_df = load_datasets()
+        player_selector = PlayerSelector(players_df)
+        player1_name, player2_name = player_selector.select_players()
 
-st.title("🎈 Player Comparison App")
+        player1_data = players_df[players_df['Player'] == player1_name].iloc[0]
+        player2_data = players_df[players_df['Player'] == player2_name].iloc[0]
 
-# --- Year selection ---
-years = ["24-25"]  # Extracted from dataset names for now
-year = st.selectbox("Select year:", years)
+        stats_processor = StatsProcessor(players_df)
+        numeric_cols = stats_processor.get_numeric_stats_columns()
+        if not numeric_cols:
+            st.error("No numeric stats columns found in the dataset to compare.")
+            st.stop()
 
-# --- League selection ---
-leagues = datasets_df["LEAGUE"].unique()
-league = st.selectbox("Select league:", leagues)
+        player1_stats_norm = stats_processor.get_normalized_stats(player1_data, numeric_cols)
+        player2_stats_norm = stats_processor.get_normalized_stats(player2_data, numeric_cols)
 
-# Load selected league dataset Excel file
-dataset_row = datasets_df[datasets_df["LEAGUE"] == league].iloc[0]
-file_path = dataset_row["PATH"]
-full_path = os.path.join("datasets", file_path)  # Adjust if needed
+        RadarChartPlotter.plot(
+            [player1_stats_norm, player2_stats_norm],
+            [player1_name, player2_name],
+            numeric_cols
+        )
 
-@st.cache_data
-def load_player_data(path):
-    # Load Excel file with players data
-    df = pd.read_excel(path)
-    return df
 
-try:
-    players_df = load_player_data(full_path)
-except Exception as e:
-    st.error(f"Failed to load data file: {e}")
-    st.stop()
-
-# Show some info about data
-st.write(f"Loaded dataset for **{league}** with {len(players_df)} players.")
-
-# --- Player selection ---
-player_names = players_df['Player'].unique()
-player1 = st.selectbox("Select Player 1", player_names)
-player2 = st.selectbox("Select Player 2", player_names, index=1 if len(player_names) > 1 else 0)
-
-if player1 == player2:
-    st.warning("Please select two different players to compare.")
-    st.stop()
-
-# --- Filter data for selected players ---
-player1_data = players_df[players_df['Player'] == player1].iloc[0]
-player2_data = players_df[players_df['Player'] == player2].iloc[0]
-
-# --- Select stats columns to compare (exclude non-numeric and 'Player' column) ---
-numeric_cols = players_df.select_dtypes(include=['number']).columns.tolist()
-if not numeric_cols:
-    st.error("No numeric stats columns found in the dataset to compare.")
-    st.stop()
-
-stats_labels = numeric_cols
-
-player1_stats = player1_data[numeric_cols]
-player2_stats = player2_data[numeric_cols]
-
-# Normalize stats for radar chart between 0 and 1 for fair comparison
-def normalize_series(s):
-    min_val = players_df[s.name].min()
-    max_val = players_df[s.name].max()
-    if max_val == min_val:
-        return s  # avoid div by zero
-    return (s - min_val) / (max_val - min_val)
-
-player1_stats_norm = normalize_series(player1_stats)
-player2_stats_norm = normalize_series(player2_stats)
-
-# Plot radar chart
-plot_radar_chart(
-    [player1_stats_norm, player2_stats_norm],
-    [player1, player2],
-    stats_labels
-)
+if __name__ == "__main__":
+    app = PlayerComparisonApp()
+    app.run()
