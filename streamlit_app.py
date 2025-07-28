@@ -20,7 +20,7 @@ class PlayerComparisonApp:
 
         dataset_path = self.dataset_loader.get_dataset_path(league)
         try:
-            players_df = load_player_data(dataset_path)  # <-- call cached function directly here
+            players_df = load_player_data(dataset_path)
         except Exception as e:
             st.error(f"Failed to load data file: {e}")
             st.stop()
@@ -35,18 +35,31 @@ class PlayerComparisonApp:
 
         stats_processor = StatsProcessor(players_df)
         numeric_cols = stats_processor.get_numeric_stats_columns()
+
         if not numeric_cols:
             st.error("No numeric stats columns found in the dataset to compare.")
             st.stop()
 
-        player1_stats_norm = stats_processor.get_normalized_stats(player1_data, numeric_cols)
-        player2_stats_norm = stats_processor.get_normalized_stats(player2_data, numeric_cols)
+        # Add multiselect to choose which stats to display
+        selected_stats = st.multiselect(
+            "Select stats to compare:",
+            options=numeric_cols,
+            default=numeric_cols  # you can set defaults or leave empty
+        )
+
+        if not selected_stats:
+            st.warning("Please select at least one stat to display.")
+            st.stop()
+
+        player1_stats_norm = stats_processor.get_normalized_stats(player1_data, selected_stats)
+        player2_stats_norm = stats_processor.get_normalized_stats(player2_data, selected_stats)
 
         RadarChartPlotter.plot(
             [player1_stats_norm, player2_stats_norm],
             [player1_name, player2_name],
-            numeric_cols
+            selected_stats
         )
+
 
 
 if __name__ == "__main__":
