@@ -27,15 +27,20 @@ class DatasetLoader:
         self.datasets_df = load_datasets_excel()
 
     def get_years(self):
-        years = self.datasets_df["YEAR"].dropna().unique()
+        raw_years = self.datasets_df["YEAR"].dropna().unique()
 
-        # Convert to strings first to catch any formatting issues, then to ints
-        try:
-            years = [int(float(str(year).strip())) for year in years]
-        except Exception as e:
-            raise ValueError(f"Failed to parse years correctly. Raw values: {years}\nError: {e}")
+        cleaned_years = []
+        for y in raw_years:
+            try:
+                cleaned_years.append(int(float(str(y).strip())))
+            except Exception as e:
+                st.warning(f"Skipping invalid year value: {y} ({e})")
 
-        return sorted(set(years), reverse=True)
+        if not cleaned_years:
+            st.error("No valid years found in dataset metadata.")
+            return []
+
+        return sorted(set(cleaned_years), reverse=True)
 
 
     def get_leagues_for_year(self, year):
