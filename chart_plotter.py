@@ -17,14 +17,16 @@ class RadarChartPlotter:
         for stats, name in zip(stats_list, player_names):
             ax.plot(angles, stats, label=name)
             ax.fill(angles, stats, alpha=0.25)
-
-            # Add value labels slightly above each point
             for angle, stat in zip(angles, stats):
                 ax.text(angle, stat + 0.05, f"{stat:.2f}", ha='center', va='center')
 
-        ax.set_thetagrids(np.degrees(angles[:-1]), categories)
-        ax.set_ylim(0, 1)  # Assuming normalized values between 0 and 1
+        # Push labels outwards a bit
+        ax.set_thetagrids(np.degrees(angles[:-1]), categories, y=1.1)
+
+        # Adjust figure margins so labels aren’t cut off
+        fig.subplots_adjust(top=0.85, bottom=0.15, left=0.15, right=0.85)
+
+        ax.set_ylim(0, 1)
         ax.legend(loc='upper right', bbox_to_anchor=(1.1, 1.1))
 
-        # Instead of plt.show(), use Streamlit to display the figure
         st.pyplot(fig)
