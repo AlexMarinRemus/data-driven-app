@@ -13,7 +13,7 @@ class PlayerComparisonApp:
         st.title("🎈 Player Comparison App")
 
         # Create two columns: left for all filters, right for chart
-        col1, col2, col3 = st.columns([1, 1, 1])
+        col1, col2, col3 = st.columns([1, 1, 4])
 
         with col1:
             st.header("Player 1 Filters")
