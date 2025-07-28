@@ -68,7 +68,7 @@ class PlayerComparisonApp:
                     [player1_stats_norm, player2_stats_norm],
                     [player1_name, player2_name],
                     selected_stats,
-                    figsize=(9, 9)
+                    figsize=(15, 15)
                 )
             else:
                 st.info("Please select at least one stat to display the radar chart.")
