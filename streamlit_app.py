@@ -84,6 +84,8 @@ class PlayerComparisonApp:
                 selected_stats
             )
         else:
+           st.header(f"🔎 {player1_name} – Attribute Overview")
+           
            for stat in selected_stats:
                 raw_value = player1_data[stat]
                 norm_value = player1_stats_norm[stat] * 100
