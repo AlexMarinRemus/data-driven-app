@@ -6,7 +6,8 @@ import os
 @st.cache_data
 def load_datasets_excel(path="datasets.xlsx"):
     df = pd.read_excel(path)
-    df.columns = df.columns.str.strip().str.upper()  # Standardize column names
+    df.columns = df.columns.str.strip().str.upper()
+    df["YEAR"] = df["YEAR"].astype(str).str.strip()
     return df
 
 @st.cache_data
@@ -27,17 +28,17 @@ class DatasetLoader:
         self.datasets_df = load_datasets_excel()
 
     def get_years(self):
-        raw_years = self.datasets_df["YEAR"].dropna().astype(str).str.strip().unique()
+        years = self.datasets_df["YEAR"].dropna().astype(str).str.strip().unique().tolist()
 
-        # Sort descending by the starting year part: "24-25" → 24
-        def sort_key(season_str):
+        # Sort years by the starting number (e.g., "21-22" → 21)
+        def sort_key(y):
             try:
-                return int(season_str.split("-")[0])
-            except:
-                return -1  # if malformed, push to bottom
+                return int(y.split("-")[0])
+            except Exception:
+                return -1  # put malformed entries at the end
 
-        sorted_years = sorted(raw_years, key=sort_key, reverse=True)
-        return sorted_years
+        return sorted(years, key=sort_key, reverse=True)
+
 
 
 
