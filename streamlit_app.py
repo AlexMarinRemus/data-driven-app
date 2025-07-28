@@ -67,8 +67,7 @@ class PlayerComparisonApp:
                 RadarChartPlotter.plot(
                     [player1_stats_norm, player2_stats_norm],
                     [player1_name, player2_name],
-                    selected_stats,
-                    figsize=(15, 15)
+                    selected_stats
                 )
             else:
                 st.info("Please select at least one stat to display the radar chart.")
