@@ -36,30 +36,30 @@ class PlayerComparisonApp:
         stats_processor = StatsProcessor(players_df)
         numeric_cols = stats_processor.get_numeric_stats_columns()
 
-        if not numeric_cols:
-            st.error("No numeric stats columns found in the dataset to compare.")
-            st.stop()
+        # Default selected stats (example)
+        default_stats = ['Goals', 'Assists', 'xG']
+        # Create two columns: left for filters, right for chart
+        col1, col2 = st.columns([1, 3])
 
-        default_stats = ["Goals", "Assists", "xG"]
+        with col1:
+            selected_stats = st.multiselect(
+                "Select stats to compare:",
+                options=numeric_cols,
+                default=[s for s in default_stats if s in numeric_cols]
+            )
+            if not selected_stats:
+                st.warning("Select at least one stat to show on the chart.")
 
-        selected_stats = st.multiselect(
-            "Select stats to compare:",
-            options=numeric_cols,
-            default=[stat for stat in default_stats if stat in numeric_cols]  # only select if present
-        )
+        with col2:
+            if selected_stats:
+                player1_stats_norm = stats_processor.get_normalized_stats(player1_data, selected_stats)
+                player2_stats_norm = stats_processor.get_normalized_stats(player2_data, selected_stats)
 
-        if not selected_stats:
-            st.warning("Please select at least one stat to display.")
-            st.stop()
-
-        player1_stats_norm = stats_processor.get_normalized_stats(player1_data, selected_stats)
-        player2_stats_norm = stats_processor.get_normalized_stats(player2_data, selected_stats)
-
-        RadarChartPlotter.plot(
-            [player1_stats_norm, player2_stats_norm],
-            [player1_name, player2_name],
-            selected_stats
-        )
+                RadarChartPlotter.plot(
+                    [player1_stats_norm, player2_stats_norm],
+                    [player1_name, player2_name],
+                    selected_stats
+                )
 
 
 
