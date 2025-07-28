@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from data_loader import DatasetLoader, load_player_data
 from stats_processor import StatsProcessor
 from chart_plotter import RadarChartPlotter
@@ -74,15 +75,42 @@ class PlayerComparisonApp:
         player1_stats_norm = stats_processor1.get_normalized_stats(player1_data, selected_stats)
 
         if compare_two_players:
-            player2_data = players_df2[players_df2['Player'] == player2_name].iloc[0]
-            stats_processor2 = StatsProcessor(players_df2)
-            player2_stats_norm = stats_processor2.get_normalized_stats(player2_data, selected_stats)
+            # Tag both datasets with year and league info
+            players_df1["Year"] = year1
+            players_df1["League"] = league1
+            players_df2["Year"] = year2
+            players_df2["League"] = league2
 
+            # Add name_year helper column
+            players_df1["name_year"] = players_df1["Player"] + f" ({year1})"
+            players_df2["name_year"] = players_df2["Player"] + f" ({year2})"
+
+            player1_name_year = f"{player1_name} ({year1})"
+            player2_name_year = f"{player2_name} ({year2})"
+
+            if year1 == year2 and league1 == league1:
+                # Same dataset → use original dfs
+                stats_processor = StatsProcessor(players_df1)
+                player1_data = players_df1[players_df1["name_year"] == player1_name_year].iloc[0]
+                player2_data = players_df2[players_df2["name_year"] == player2_name_year].iloc[0]
+
+            else:
+                # Merge and normalize from common distribution
+                combined_df = pd.concat([players_df1, players_df2], ignore_index=True)
+                stats_processor = StatsProcessor(combined_df)
+                player1_data = combined_df[combined_df["name_year"] == player1_name_year].iloc[0]
+                player2_data = combined_df[combined_df["name_year"] == player2_name_year].iloc[0]
+
+            # Normalize from the appropriate processor
+            player1_stats_norm = stats_processor.get_normalized_stats(player1_data, selected_stats)
+            player2_stats_norm = stats_processor.get_normalized_stats(player2_data, selected_stats)
+
+            # Plot radar
             RadarChartPlotter.plot(
-            [player1_stats_norm, player2_stats_norm],
-            [f"{player1_name} ({year1})", f"{player2_name} ({year2})"],
-            selected_stats
-        )
+                [player1_stats_norm, player2_stats_norm],
+                [player1_name_year, player2_name_year],
+                selected_stats
+            )
         else:
            st.header(f"🔎 {player1_name} – Attribute Overview")
 
