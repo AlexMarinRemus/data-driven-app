@@ -4,23 +4,26 @@ import streamlit as st
 
 class RadarChartPlotter:
     @staticmethod
-    def plot(player_stats_list, player_names, stats_labels):
-        num_vars = len(stats_labels)
+    def plot(stats_list, player_names, categories):
+        num_vars = len(categories)
+
+        # Compute angle for each category
         angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+        # Close the plot
+        stats_list = [list(stats) + [stats[0]] for stats in stats_list]
         angles += angles[:1]
 
         fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
 
-        for i, player in enumerate(player_names):
-            values = player_stats_list[i].tolist()
-            values += values[:1]
-            ax.plot(angles, values, label=player)
-            ax.fill(angles, values, alpha=0.25)
+        for stats, name in zip(stats_list, player_names):
+            ax.plot(angles, stats, label=name)
+            ax.fill(angles, stats, alpha=0.25)
 
-        ax.set_xticks(angles[:-1])
-        ax.set_xticklabels(stats_labels)
-        ax.set_yticklabels([])
-        ax.set_title("Player Comparison Radar Chart")
-        ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+            # Add data labels for each point
+            for angle, stat in zip(angles, stats):
+                ax.text(angle, stat + 0.05, f"{stat:.2f}", ha='center', va='center')
 
-        st.pyplot(fig)
+        ax.set_thetagrids(np.degrees(angles[:-1]), categories)
+        ax.set_ylim(0, 1)  # Assuming normalized stats 0-1
+        ax.legend(loc='upper right', bbox_to_anchor=(1.1, 1.1))
+        plt.show()
