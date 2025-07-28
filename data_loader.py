@@ -22,4 +22,9 @@ class DatasetLoader:
         row = self.datasets_df[self.datasets_df["LEAGUE"] == league]
         if row.empty:
             raise ValueError(f"No dataset path found for league '{league}'")
-        return os.path.join("datasets", row.iloc[0]["PATH"])
+
+        path_value = row.iloc[0]["PATH"]
+        if not isinstance(path_value, str):
+            raise TypeError(f"Expected string for path, got {type(path_value)}: {path_value}")
+
+        return os.path.join("datasets", path_value.strip())
