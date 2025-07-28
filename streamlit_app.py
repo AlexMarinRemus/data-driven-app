@@ -40,11 +40,12 @@ class PlayerComparisonApp:
             st.error("No numeric stats columns found in the dataset to compare.")
             st.stop()
 
-        # Add multiselect to choose which stats to display
+        default_stats = ["Goals", "Assists", "xG"]
+
         selected_stats = st.multiselect(
             "Select stats to compare:",
             options=numeric_cols,
-            default=numeric_cols  # you can set defaults or leave empty
+            default=[stat for stat in default_stats if stat in numeric_cols]  # only select if present
         )
 
         if not selected_stats:
