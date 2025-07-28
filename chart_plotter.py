@@ -20,18 +20,17 @@ class RadarChartPlotter:
             for angle, stat in zip(angles, stats):
                 ax.text(angle, stat + 0.05, f"{stat:.2f}", ha='center', va='center')
 
-        # Push labels slightly outward, but not too far
-        ax.set_thetagrids(np.degrees(angles[:-1]), categories, y=1.05)
+        # Push labels outward a bit more
+        ax.set_thetagrids(np.degrees(angles[:-1]), categories, y=1.12)
 
-        # Adjust margins so labels aren't cut off
-        fig.subplots_adjust(top=0.85, bottom=0.15, left=0.15, right=0.85)
+        # Add padding for labels so they don’t get cut off
+        ax.tick_params(axis='x', pad=15)
 
-        # Optional fine-tune label position
-        labels = ax.get_xticklabels()
-        for label in labels:
-            label.set_y(label.get_position()[1] + 0.05)
+        # Adjust subplot margins to avoid clipping labels
+        fig.subplots_adjust(top=0.9, bottom=0.1, left=0.1, right=0.9)
+        fig.tight_layout()
 
         ax.set_ylim(0, 1)
-        ax.legend(loc='upper right', bbox_to_anchor=(1.1, 1.1))
+        ax.legend(loc='upper right', bbox_to_anchor=(1.2, 1.1))
 
         st.pyplot(fig)
