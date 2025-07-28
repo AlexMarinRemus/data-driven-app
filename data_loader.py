@@ -5,7 +5,9 @@ import os
 # Cache the loading of the Excel file
 @st.cache_data
 def load_datasets_excel(path="datasets.xlsx"):
-    return pd.read_excel(path)
+    df = pd.read_excel(path)
+    df.columns = df.columns.str.strip().str.upper()  # Standardize column names
+    return df
 
 @st.cache_data
 def load_player_data(path):
