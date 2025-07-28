@@ -4,15 +4,14 @@ import streamlit as st
 
 class RadarChartPlotter:
     @staticmethod
-    def plot(stats_list, player_names, categories):
+    def plot(stats_list, player_names, categories, figsize=(7, 7)):
         num_vars = len(categories)
         angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
 
-        # Close the stats and angles loop
         stats_list = [list(stats) + [stats[0]] for stats in stats_list]
         angles += angles[:1]
 
-        fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
+        fig, ax = plt.subplots(figsize=figsize, subplot_kw=dict(polar=True))
 
         for stats, name in zip(stats_list, player_names):
             ax.plot(angles, stats, label=name)
@@ -20,8 +19,7 @@ class RadarChartPlotter:
             for angle, stat in zip(angles, stats):
                 ax.text(angle, stat + 0.05, f"{stat:.2f}", ha='center', va='center')
 
-        ax.set_thetagrids(np.degrees(angles[:-1]), categories)
-
+        ax.set_thetagrids(np.degrees(angles[:-1]), categories, y=1.05)
         fig.subplots_adjust(top=0.85, bottom=0.15, left=0.15, right=0.85)
 
         ax.set_ylim(0, 1)
