@@ -27,7 +27,16 @@ class DatasetLoader:
         self.datasets_df = load_datasets_excel()
 
     def get_years(self):
-        return sorted(self.datasets_df["YEAR"].dropna().unique().tolist(), reverse=True)
+        years = self.datasets_df["YEAR"].dropna().unique()
+
+        # Convert to strings first to catch any formatting issues, then to ints
+        try:
+            years = [int(float(str(year).strip())) for year in years]
+        except Exception as e:
+            raise ValueError(f"Failed to parse years correctly. Raw values: {years}\nError: {e}")
+
+        return sorted(set(years), reverse=True)
+
 
     def get_leagues_for_year(self, year):
         return self.datasets_df[self.datasets_df["YEAR"] == year]["LEAGUE"].dropna().unique().tolist()
