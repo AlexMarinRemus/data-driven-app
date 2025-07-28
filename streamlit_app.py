@@ -13,9 +13,10 @@ class PlayerComparisonApp:
         st.title("🎈 Player Comparison App")
 
         # Create two columns: left for all filters, right for chart
-        col1, col2 = st.columns([1, 3])
+        col1, col_empty, col2 = st.columns([1, 0.2, 3])  # 0.2 is the width of the empty column
 
         with col1:
+            # All your filters here
             years = ["24-25"]
             year = st.selectbox("Select year:", years)
 
@@ -45,6 +46,10 @@ class PlayerComparisonApp:
 
             if not selected_stats:
                 st.warning("Select at least one stat to show on the chart.")
+
+        with col_empty:
+            print(0)
+            # This column is intentionally left empty to add space
 
         with col2:
             if selected_stats:
