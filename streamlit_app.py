@@ -8,7 +8,7 @@ class PlayerComparisonApp:
     def __init__(self):
         self.dataset_loader = DatasetLoader()
 
-    def get_color(percent):
+    def get_color(self, percent):
         if percent >= 75:
             return "green"
         elif percent >= 40:
