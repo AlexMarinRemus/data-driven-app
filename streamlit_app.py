@@ -14,7 +14,7 @@ class PlayerComparisonApp:
         st.sidebar.header("Filter Options")
 
         # Load dataset metadata
-        dataset_metadata = self.dataset_loader.get_dataset_metadata()
+        dataset_metadata = self.dataset_loader.get_metadata()
         available_years = sorted(dataset_metadata['YEAR'].unique(), reverse=True)
 
         # Player 1 filters
