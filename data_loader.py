@@ -4,7 +4,7 @@ import streamlit as st
 import os
 
 @st.cache_data
-def load_datasets_csv(path="datasets.csv"):
+def load_datasets_csv(path="datasets.xlsx"):
     return pd.read_csv(path, delimiter=';')
 
 @st.cache_data
