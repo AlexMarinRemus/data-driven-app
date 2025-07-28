@@ -15,16 +15,22 @@ class DatasetLoader:
     def __init__(self):
         self.datasets_df = load_datasets_excel()
 
-    def get_leagues(self):
-        return self.datasets_df["LEAGUE"].dropna().tolist()
+    def get_years(self):
+        return sorted(self.datasets_df["YEAR"].dropna().unique().tolist(), reverse=True)
 
-    def get_dataset_path(self, league):
-        row = self.datasets_df[self.datasets_df["LEAGUE"] == league]
+    def get_leagues_for_year(self, year):
+        return self.datasets_df[self.datasets_df["YEAR"] == year]["LEAGUE"].dropna().unique().tolist()
+
+    def get_dataset_path(self, league, year):
+        row = self.datasets_df[(self.datasets_df["LEAGUE"] == league) & (self.datasets_df["YEAR"] == year)]
         if row.empty:
-            raise ValueError(f"No dataset path found for league '{league}'")
+            raise ValueError(f"No dataset path found for league '{league}' and year '{year}'")
         
         path_value = row.iloc[0]["PATH"]
         if not isinstance(path_value, str):
             raise TypeError(f"Expected string for path, got {type(path_value)}: {path_value}")
 
         return os.path.join("datasets", path_value)
+
+    def get_metadata(self):
+        return self.datasets_df.copy()

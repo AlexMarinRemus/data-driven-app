@@ -1,9 +1,8 @@
 import streamlit as st
-
 from data_loader import DatasetLoader, load_player_data
-from player_selector import PlayerSelector
 from stats_processor import StatsProcessor
 from chart_plotter import RadarChartPlotter
+
 
 class PlayerComparisonApp:
     def __init__(self):
@@ -12,56 +11,60 @@ class PlayerComparisonApp:
     def run(self):
         st.title("Player Comparison App")
 
-        # Move all filters to sidebar
-        st.sidebar.header("Filter")
+        st.sidebar.header("Filter Options")
 
-        # Player 1 Filters
-        st.sidebar.header("Player 1 Filters")
-        years = ["24-25"]
-        year1 = st.sidebar.selectbox("Select year (Player 1):", years, key="year1")
+        # Load dataset metadata
+        dataset_metadata = self.dataset_loader.get_dataset_metadata()
+        available_years = sorted(dataset_metadata['YEAR'].unique(), reverse=True)
 
-        leagues1 = self.dataset_loader.get_leagues()
+        # Player 1 filters
+        st.sidebar.subheader("Player 1 Filters")
+        year1 = st.sidebar.selectbox("Select year (Player 1):", available_years, key="year1")
+        leagues1 = dataset_metadata[dataset_metadata['YEAR'] == year1]['LEAGUE'].unique()
         league1 = st.sidebar.selectbox("Select league (Player 1):", leagues1, key="league1")
-
-        dataset_path1 = self.dataset_loader.get_dataset_path(league1)
+        dataset_path1 = self.dataset_loader.get_dataset_path(league1, year1)
         players_df1 = load_player_data(dataset_path1)
-
         player_names1 = players_df1['Player'].unique()
         player1_name = st.sidebar.selectbox("Select player 1:", player_names1, key="player1")
 
         st.sidebar.markdown("---")
 
-        # Player 2 Filters
-        st.sidebar.header("Player 2 Filters")
-        year2 = st.sidebar.selectbox("Select year (Player 2):", years, key="year2")
+        # Toggle comparison
+        compare_two_players = st.sidebar.checkbox("Compare with a second player", value=True)
 
-        leagues2 = self.dataset_loader.get_leagues()
-        league2 = st.sidebar.selectbox("Select league (Player 2):", leagues2, key="league2")
-
-        dataset_path2 = self.dataset_loader.get_dataset_path(league2)
-        players_df2 = load_player_data(dataset_path2)
-
-        player_names2 = players_df2['Player'].unique()
-        player2_name = st.sidebar.selectbox("Select player 2:", player_names2, key="player2")
+        if compare_two_players:
+            st.sidebar.subheader("Player 2 Filters")
+            year2 = st.sidebar.selectbox("Select year (Player 2):", available_years, key="year2")
+            leagues2 = dataset_metadata[dataset_metadata['YEAR'] == year2]['LEAGUE'].unique()
+            league2 = st.sidebar.selectbox("Select league (Player 2):", leagues2, key="league2")
+            dataset_path2 = self.dataset_loader.get_dataset_path(league2, year2)
+            players_df2 = load_player_data(dataset_path2)
+            player_names2 = players_df2['Player'].unique()
+            player2_name = st.sidebar.selectbox("Select player 2:", player_names2, key="player2")
 
         st.sidebar.markdown("---")
 
         # Stats multiselect
         stats_processor1 = StatsProcessor(players_df1)
         numeric_cols = stats_processor1.get_numeric_stats_columns()
-
+        default_stats = ["Goals", "Assists", "xG"]
         selected_stats = st.sidebar.multiselect(
             "Select stats to compare:",
             options=numeric_cols,
-            default=["Goals", "Assists", "xG"] if set(["Goals", "Assists", "xG"]).issubset(numeric_cols) else []
+            default=[stat for stat in default_stats if stat in numeric_cols]
         )
 
-        # Main page: show radar chart or info
-        if selected_stats:
-            player1_data = players_df1[players_df1['Player'] == player1_name].iloc[0]
-            player2_data = players_df2[players_df2['Player'] == player2_name].iloc[0]
+        # Output
+        if not selected_stats:
+            st.info("Please select at least one stat to proceed.")
+            return
 
-            player1_stats_norm = stats_processor1.get_normalized_stats(player1_data, selected_stats)
+        player1_data = players_df1[players_df1['Player'] == player1_name].iloc[0]
+        stats_processor1 = StatsProcessor(players_df1)
+        player1_stats_norm = stats_processor1.get_normalized_stats(player1_data, selected_stats)
+
+        if compare_two_players:
+            player2_data = players_df2[players_df2['Player'] == player2_name].iloc[0]
             stats_processor2 = StatsProcessor(players_df2)
             player2_stats_norm = stats_processor2.get_normalized_stats(player2_data, selected_stats)
 
@@ -71,7 +74,23 @@ class PlayerComparisonApp:
                 selected_stats
             )
         else:
-            st.info("Please select at least one stat to display the radar chart.")
+            st.subheader(f"{player1_name} – Attributes Overview")
+
+            for stat in selected_stats:
+                raw_value = player1_data[stat]
+                norm_value = player1_stats_norm[stat] * 100
+
+                if norm_value >= 75:
+                    color = "green"
+                elif norm_value >= 40:
+                    color = "yellow"
+                elif norm_value >= 25:
+                    color = "orange"
+                else:
+                    color = "red"
+
+                st.markdown(f"**{stat}**: {raw_value}")
+                st.progress(norm_value / 100, text=f"{norm_value:.0f}%", color=color)
 
 
 if __name__ == "__main__":
