@@ -23,7 +23,7 @@ class RadarChartPlotter:
 
         ax.set_thetagrids(np.degrees(angles[:-1]), categories, fontsize=8)
         for label in ax.get_xticklabels():
-            label.set_position((1.1, label.get_position()[1]))
+            label.set_position((1.5, label.get_position()[1]))
         ax.set_ylim(0, 1)
         ax.legend(loc='upper right', bbox_to_anchor=(1.1, 1.1))
         st.pyplot(fig)
