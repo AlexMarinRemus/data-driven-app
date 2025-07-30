@@ -144,24 +144,25 @@ class PlayerComparisonApp:
         else:
             st.header(f"🔎 {player1_name} – Attribute Overview")
 
-            # Map raw position string to enum
-            player1_position_enum = stats_processor1.map_position_to_enum(player1_data["Position"])
+            player1_position = player1_data["Position"]
 
-            # Toggle to choose normalization group
-            normalize_by_position = st.toggle(f"Normalize relative to average {player1_data['Position']}s", value=True)
+            # Toggle: normalize relative to same-position players or all players
+            normalize_by_position = st.toggle(f"Normalize relative to average {player1_position}s", value=True)
 
-            if normalize_by_position and player1_position_enum is not None:
-                # Filter players by position enum, exclude player1
-                base_players = stats_processor1.filter_players_by_position_enum(player1_position_enum, exclude_player=player1_name)
+            if normalize_by_position:
+                # Filter players with same position (including player1)
+                base_players = stats_processor1.players_df[
+                    stats_processor1.players_df["Position"] == player1_position
+                ]
             else:
-                # Use all players for normalization
+                # Use all players
                 base_players = stats_processor1.players_df
 
-            # Create temporary StatsProcessor for normalization group
+            # Create a temp processor with the chosen base players for normalization
             temp_stats_processor = StatsProcessor(base_players)
             temp_stats_processor.create_columns()
 
-            # Normalize player1 stats relative to chosen group
+            # Normalize player1 stats based on chosen base group
             player1_stats_norm = temp_stats_processor.get_normalized_stats(player1_data, selected_stats)
 
             # Show normalized bars for player1
