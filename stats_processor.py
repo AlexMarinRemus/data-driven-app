@@ -1,5 +1,5 @@
 import pandas as pd
-from enums import ToCreateColumns, ExistentFieldPlayerColumn, ColumnMapping
+from enums import ToCreateColumns, ExistentFieldPlayerColumn, ColumnMapping, Position
 
 class StatsProcessor:
     def __init__(self, players_df: pd.DataFrame):
@@ -44,3 +44,21 @@ class StatsProcessor:
                 # Handle missing column; could set to NaN or 0 or skip
                 normalized[col] = float('nan')  # or 0
         return pd.Series(normalized)
+    
+    def map_position_to_enum(self, raw_position: str) -> Position | None:
+        if not raw_position or pd.isna(raw_position):
+            return None
+        for pos_enum in Position:
+            if raw_position in pos_enum.value:
+                return pos_enum
+        return None
+
+    def filter_players_by_position_enum(self, position_enum: Position, exclude_player: str | None = None) -> pd.DataFrame:
+        def matches_enum(row):
+            positions = [row.get("Primary position"), row.get("Secondary position")]
+            return any(pos in position_enum.value for pos in positions if pos)
+
+        filtered_df = self.players_df[self.players_df.apply(matches_enum, axis=1)]
+        if exclude_player:
+            filtered_df = filtered_df[filtered_df["Player"] != exclude_player]
+        return filtered_df

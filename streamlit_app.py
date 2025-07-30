@@ -143,19 +143,67 @@ class PlayerComparisonApp:
 
         else:
             st.header(f"🔎 {player1_name} – Attribute Overview")
-            for stat in selected_stats:
-                raw_value = player1_data[stat]
-                norm_value = player1_stats_norm[stat] * 100
-                color = self.get_color(norm_value)
 
-                st.markdown(f"**{stat}**: {raw_value} ({norm_value:.0f}%)")
-                st.markdown(f"""
-                    <div style="background-color: #e0e0e0; border-radius: 8px; overflow: hidden; height: 20px; width: 100%; margin-bottom: 10px;">
-                        <div style="width: {norm_value}%; background-color: {color}; height: 100%; text-align: center;">
-                            <span style="color: black; font-size: 14px;">{norm_value:.0f}%</span>
+            player1_position = player1_data["Position"]
+
+            # Toggle: normalize relative to same-position players or all players
+            normalize_by_position = st.toggle(f"Normalize relative to average {player1_position}s", value=True)
+
+            if normalize_by_position:
+                # Filter players with same position (including player1)
+                base_players = stats_processor1.players_df[
+                    stats_processor1.players_df["Position"] == player1_position
+                ]
+            else:
+                # Use all players
+                base_players = stats_processor1.players_df
+
+            # Create a temp processor with the chosen base players for normalization
+            temp_stats_processor = StatsProcessor(base_players)
+            temp_stats_processor.create_columns()
+
+            # Normalize player1 stats based on chosen base group
+            player1_stats_norm = temp_stats_processor.get_normalized_stats(player1_data, selected_stats)
+
+            # Now show player stats
+            st.markdown(f"**Player: {player1_name}** (Position: {player1_position})")
+
+            # Optionally compare with average of base group excluding player1
+            compare_with_avg = st.toggle(f"Compare with average of selected group", value=False)
+
+            if compare_with_avg:
+                # Average stats of base group except player1
+                base_players_excl = base_players[base_players["Player"] != player1_name]
+
+                if not base_players_excl.empty:
+                    avg_real_stats = base_players_excl[selected_stats].mean()
+                    avg_norm_stats = temp_stats_processor.get_normalized_stats(avg_real_stats, selected_stats)
+
+                    RadarChartPlotter.plot(
+                        [player1_stats_norm, avg_norm_stats],
+                        [player1_data[selected_stats], avg_real_stats],
+                        [player1_name, f"Avg Group"],
+                        selected_stats
+                    )
+                else:
+                    st.warning("No other players found in the selected group for comparison.")
+            else:
+                # Show normalized bars for player1
+                for stat in selected_stats:
+                    raw_value = player1_data[stat]
+                    norm_value = player1_stats_norm[stat] * 100
+                    color = self.get_color(norm_value)
+
+                    st.markdown(f"**{stat}**: {raw_value} ({norm_value:.0f}%)")
+                    st.markdown(f"""
+                        <div style="background-color: #e0e0e0; border-radius: 8px; overflow: hidden; height: 20px; width: 100%; margin-bottom: 10px;">
+                            <div style="width: {norm_value}%; background-color: {color}; height: 100%; text-align: center;">
+                                <span style="color: black; font-size: 14px;">{norm_value:.0f}%</span>
+                            </div>
                         </div>
-                    </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
+
+
 
 
 
