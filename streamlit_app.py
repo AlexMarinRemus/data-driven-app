@@ -41,7 +41,7 @@ class PlayerComparisonApp:
         stats_processor1.create_columns()
         
         # Select player names from the processed DataFrame to include new columns
-        player_names1 = stats_processor1.players_df['Player'].unique()
+        player_names1 = stats_processor1.players_df['Full name'].unique()
         player1_name = st.sidebar.selectbox("Select player 1:", player_names1, key="player1")
 
         st.sidebar.markdown("---")
@@ -60,7 +60,7 @@ class PlayerComparisonApp:
             stats_processor2 = StatsProcessor(players_df2)
             stats_processor2.create_columns()
             
-            player_names2 = stats_processor2.players_df['Player'].unique()
+            player_names2 = stats_processor2.players_df['Full name'].unique()
             player2_name = st.sidebar.selectbox("Select player 2:", player_names2, key="player2")
 
         st.sidebar.markdown("---")
@@ -95,7 +95,7 @@ class PlayerComparisonApp:
             return
 
         # Select player1_data from stats_processor1's processed DataFrame
-        player1_data = stats_processor1.players_df[stats_processor1.players_df['Player'] == player1_name].iloc[0]
+        player1_data = stats_processor1.players_df[stats_processor1.players_df['Full name'] == player1_name].iloc[0]
         player1_stats_norm = stats_processor1.get_normalized_stats(player1_data, selected_stats)
 
         if compare_two_players:
