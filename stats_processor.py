@@ -36,7 +36,11 @@ class StatsProcessor:
         return (values - min_val) / (max_val - min_val)
 
     def get_normalized_stats(self, player_row: pd.Series, columns: list[str]) -> pd.Series:
-        return pd.Series({
-            col: self.normalize(col, player_row[col])
-            for col in columns
-        })
+        normalized = {}
+        for col in columns:
+            if col in player_row:
+                normalized[col] = self.normalize(col, player_row[col])
+            else:
+                # Handle missing column; could set to NaN or 0 or skip
+                normalized[col] = float('nan')  # or 0
+        return pd.Series(normalized)

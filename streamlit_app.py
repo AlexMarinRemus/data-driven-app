@@ -63,9 +63,6 @@ class PlayerComparisonApp:
 
         # === Stat Selection ===
         stats_processor1 = StatsProcessor(players_df1)
-        print("stats_processor1 object:", stats_processor1)
-        print("Type:", type(stats_processor1))
-        print("Attributes:", dir(stats_processor1))
         stats_processor1.create_columns()
         numeric_cols = stats_processor1.get_numeric_stats_columns()
 
