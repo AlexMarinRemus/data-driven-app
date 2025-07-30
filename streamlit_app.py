@@ -106,8 +106,12 @@ class PlayerComparisonApp:
             player2_stats_norm = stats_processor.get_normalized_stats(player2_data, selected_stats)
 
             # Plot radar
+            player1_stats_real = player1_data[selected_stats]
+            player2_stats_real = player2_data[selected_stats]
+
             RadarChartPlotter.plot(
                 [player1_stats_norm, player2_stats_norm],
+                [player1_stats_real, player2_stats_real],
                 [player1_name_year, player2_name_year],
                 selected_stats
             )
