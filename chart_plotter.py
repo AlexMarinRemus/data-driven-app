@@ -21,7 +21,7 @@ class RadarChartPlotter:
             for angle, norm_val, real_val in zip(angles, norm_stats, real_stats):
                 ax.text(angle, norm_val + 0.05, f"{real_val:.2f}", ha='center', va='center', fontsize=8)
 
-        ax.set_thetagrids(np.degrees(angles[:-1]), categories)
+        ax.set_thetagrids(np.degrees(angles[:-1]), categories, fontsize=8)
         ax.set_ylim(0, 1)
         ax.legend(loc='upper right', bbox_to_anchor=(1.1, 1.1))
         st.pyplot(fig)
