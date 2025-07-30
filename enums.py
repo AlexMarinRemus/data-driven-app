@@ -32,7 +32,7 @@ class Stats(Enum):
                           "Crosses to goalie box per 90", "Touches in box per 90"]
     ATTACKING_MIDFIELDER = ["Forward passes per 90", "Accurate forward passes per 90", "Progressive passes per 90", "Accurate progressive passes per 90", 
                           "Offensive duels per 90", "Offensive duels won per 90", "Goals per 90", "xG per 90", "Assists per 90", "xA per 90"]
-    WINGER = ["Goals", "Assists", "Shots on target per 90", "xG", "Accurate crosses, %", "Successful dribbles, %", 
+    WINGER = ["Goals per 90", "Assists per 90", "Shots on target per 90", "xG per 90", "Accurate crosses, %", "Successful dribbles, %", 
               "Offensive duels won, %", "Touches in box per 90", "Progressive runs per 90", "Passes to final third per 90", 
               "Shot efficiency"]
     STRIKER = ["Goals per 90", "xG per 90", "Assists per 90", "xA per 90", "Shots per 90", "Shots on target per 90", "Touches in box per 90", "Offensive duels won per 90",

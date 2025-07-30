@@ -63,6 +63,7 @@ class PlayerComparisonApp:
 
         # === Stat Selection ===
         stats_processor1 = StatsProcessor(players_df1)
+        stats_processor1.create_columns()
         numeric_cols = stats_processor1.get_numeric_stats_columns()
 
         if selected_config == "Custom":
@@ -104,11 +105,13 @@ class PlayerComparisonApp:
             # Use shared or merged data
             if year1 == year2 and league1 == league2:
                 stats_processor = StatsProcessor(players_df1)
+                stats_processor.create_columns()
                 player1_data = players_df1[players_df1["name_year"] == player1_name_year].iloc[0]
                 player2_data = players_df2[players_df2["name_year"] == player2_name_year].iloc[0]
             else:
                 combined_df = pd.concat([players_df1, players_df2], ignore_index=True)
                 stats_processor = StatsProcessor(combined_df)
+                stats_processor.create_columns()
                 player1_data = combined_df[combined_df["name_year"] == player1_name_year].iloc[0]
                 player2_data = combined_df[combined_df["name_year"] == player2_name_year].iloc[0]
 
