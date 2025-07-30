@@ -105,8 +105,8 @@ class PlayerComparisonApp:
             stats_processor2.players_df["Year"] = year2
             stats_processor2.players_df["League"] = league2
 
-            stats_processor1.players_df["name_year"] = stats_processor1.players_df["Player"] + f" ({year1})"
-            stats_processor2.players_df["name_year"] = stats_processor2.players_df["Player"] + f" ({year2})"
+            stats_processor1.players_df["name_year"] = stats_processor1.players_df["Full name"] + f" ({year1})"
+            stats_processor2.players_df["name_year"] = stats_processor2.players_df["Full name"] + f" ({year2})"
 
             player1_name_year = f"{player1_name} ({year1})"
             player2_name_year = f"{player2_name} ({year2})"
