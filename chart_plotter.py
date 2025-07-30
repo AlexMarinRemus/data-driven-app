@@ -15,11 +15,14 @@ class RadarChartPlotter:
         fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
 
         for norm_stats, real_stats, name in zip(normalized_stats_list, real_stats_list, player_names):
-            ax.plot(angles, norm_stats, label=name)
+            line = ax.plot(angles, norm_stats, label=name)
             ax.fill(angles, norm_stats, alpha=0.25)
 
+            color = line[0].get_color()
+
             for angle, norm_val, real_val in zip(angles, norm_stats, real_stats):
-                ax.text(angle, norm_val + 0.02, f"{real_val:.2f}", ha='center', va='center', fontsize=8)
+                ax.text(angle, norm_val + 0.02, f"{real_val:.2f}", ha='center', va='center', fontsize=8, color=color)
+
 
         ax.set_thetagrids(np.degrees(angles[:-1]), categories, fontsize=8)
         ax.set_ylim(0, 1)
