@@ -165,20 +165,44 @@ class PlayerComparisonApp:
             # Normalize player1 stats based on chosen base group
             player1_stats_norm = temp_stats_processor.get_normalized_stats(player1_data, selected_stats)
 
-            # Show normalized bars for player1
-            for stat in selected_stats:
-                raw_value = player1_data[stat]
-                norm_value = player1_stats_norm[stat] * 100
-                color = self.get_color(norm_value)
+            # Divide selected stats into two columns
+            half = (len(selected_stats) + 1) // 2
+            col1_stats = selected_stats[:half]
+            col2_stats = selected_stats[half:]
+            col1, col2 = st.columns(2)
 
-                st.markdown(f"**{stat}**: {raw_value} ({norm_value:.0f}%)")
-                st.markdown(f"""
-                    <div style="background-color: #e0e0e0; border-radius: 8px; overflow: hidden; height: 20px; width: 100%; margin-bottom: 10px;">
-                        <div style="width: {norm_value}%; background-color: {color}; height: 100%; text-align: center;">
-                            <span style="color: black; font-size: 14px;">{norm_value:.0f}%</span>
+            # Display in col1
+            with col1:
+                for stat in col1_stats:
+                    raw_value = player1_data[stat]
+                    norm_value = player1_stats_norm[stat] * 100
+                    color = self.get_color(norm_value)
+
+                    st.markdown(f"**{stat}**: {raw_value} ({norm_value:.0f}%)")
+                    st.markdown(f"""
+                        <div style="background-color: #e0e0e0; border-radius: 8px; overflow: hidden; height: 20px; width: 100%; margin-bottom: 10px;">
+                            <div style="width: {norm_value}%; background-color: {color}; height: 100%; text-align: center;">
+                                <span style="color: black; font-size: 14px;">{norm_value:.0f}%</span>
+                            </div>
                         </div>
-                    </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
+
+            # Display in col2
+            with col2:
+                for stat in col2_stats:
+                    raw_value = player1_data[stat]
+                    norm_value = player1_stats_norm[stat] * 100
+                    color = self.get_color(norm_value)
+
+                    st.markdown(f"**{stat}**: {raw_value} ({norm_value:.0f}%)")
+                    st.markdown(f"""
+                        <div style="background-color: #e0e0e0; border-radius: 8px; overflow: hidden; height: 20px; width: 100%; margin-bottom: 10px;">
+                            <div style="width: {norm_value}%; background-color: {color}; height: 100%; text-align: center;">
+                                <span style="color: black; font-size: 14px;">{norm_value:.0f}%</span>
+                            </div>
+                        </div>
+                    """, unsafe_allow_html=True)
+
 
 
 
