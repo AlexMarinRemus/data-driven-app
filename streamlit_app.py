@@ -178,7 +178,7 @@ class PlayerComparisonApp:
                     norm_value = player1_stats_norm[stat] * 100
                     color = self.get_color(norm_value)
 
-                    st.markdown(f"**{stat}**: {raw_value} ({norm_value:.0f}%)")
+                    st.markdown(f"**{stat}**: {raw_value:.3f} ({norm_value:.0f}%)")
                     st.markdown(f"""
                         <div style="background-color: #e0e0e0; border-radius: 8px; overflow: hidden; height: 20px; width: 100%; margin-bottom: 10px;">
                             <div style="width: {norm_value}%; background-color: {color}; height: 100%; text-align: center;">
@@ -194,7 +194,7 @@ class PlayerComparisonApp:
                     norm_value = player1_stats_norm[stat] * 100
                     color = self.get_color(norm_value)
 
-                    st.markdown(f"**{stat}**: {raw_value} ({norm_value:.0f}%)")
+                    st.markdown(f"**{stat}**: {raw_value:.3f} ({norm_value:.0f}%)")
                     st.markdown(f"""
                         <div style="background-color: #e0e0e0; border-radius: 8px; overflow: hidden; height: 20px; width: 100%; margin-bottom: 10px;">
                             <div style="width: {norm_value}%; background-color: {color}; height: 100%; text-align: center;">
