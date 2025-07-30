@@ -144,7 +144,7 @@ class PlayerComparisonApp:
         else:
             st.header(f"🔎 {player1_name} – Attribute Overview")
 
-            player1_position = player1_data["Position"]
+            player1_position = player1_data["Primary Position"]
 
             # Toggle: normalize relative to same-position players or all players
             normalize_by_position = st.toggle(f"Normalize relative to average {player1_position}s", value=True)
@@ -152,7 +152,7 @@ class PlayerComparisonApp:
             if normalize_by_position:
                 # Filter players with same position (including player1)
                 base_players = stats_processor1.players_df[
-                    stats_processor1.players_df["Position"] == player1_position
+                    stats_processor1.players_df["Primary Position"] == player1_position
                 ]
             else:
                 # Use all players
