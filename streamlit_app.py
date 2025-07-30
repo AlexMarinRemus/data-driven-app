@@ -35,7 +35,13 @@ class PlayerComparisonApp:
         league1 = st.sidebar.selectbox("Select league (Player 1):", leagues1, key="league1")
         dataset_path1 = self.dataset_loader.get_dataset_path(league1, year1)
         players_df1 = load_player_data(dataset_path1)
-        player_names1 = players_df1['Player'].unique()
+        
+        # Initialize StatsProcessor for player 1 data and create new columns
+        stats_processor1 = StatsProcessor(players_df1)
+        stats_processor1.create_columns()
+        
+        # Select player names from the processed DataFrame to include new columns
+        player_names1 = stats_processor1.players_df['Player'].unique()
         player1_name = st.sidebar.selectbox("Select player 1:", player_names1, key="player1")
 
         st.sidebar.markdown("---")
@@ -50,7 +56,11 @@ class PlayerComparisonApp:
             league2 = st.sidebar.selectbox("Select league (Player 2):", leagues2, key="league2")
             dataset_path2 = self.dataset_loader.get_dataset_path(league2, year2)
             players_df2 = load_player_data(dataset_path2)
-            player_names2 = players_df2['Player'].unique()
+            
+            stats_processor2 = StatsProcessor(players_df2)
+            stats_processor2.create_columns()
+            
+            player_names2 = stats_processor2.players_df['Player'].unique()
             player2_name = st.sidebar.selectbox("Select player 2:", player_names2, key="player2")
 
         st.sidebar.markdown("---")
@@ -62,8 +72,6 @@ class PlayerComparisonApp:
         selected_config = st.sidebar.selectbox("Select role configuration:", config_options)
 
         # === Stat Selection ===
-        stats_processor1 = StatsProcessor(players_df1)
-        stats_processor1.create_columns()
         numeric_cols = stats_processor1.get_numeric_stats_columns()
 
         if selected_config == "Custom":
@@ -86,34 +94,39 @@ class PlayerComparisonApp:
             st.info("Please select at least one stat to proceed.")
             return
 
-        player1_data = players_df1[players_df1['Player'] == player1_name].iloc[0]
+        # Select player1_data from stats_processor1's processed DataFrame
+        player1_data = stats_processor1.players_df[stats_processor1.players_df['Player'] == player1_name].iloc[0]
         player1_stats_norm = stats_processor1.get_normalized_stats(player1_data, selected_stats)
 
         if compare_two_players:
             # Prepare both datasets
-            players_df1["Year"] = year1
-            players_df1["League"] = league1
-            players_df2["Year"] = year2
-            players_df2["League"] = league2
+            stats_processor1.players_df["Year"] = year1
+            stats_processor1.players_df["League"] = league1
+            stats_processor2.players_df["Year"] = year2
+            stats_processor2.players_df["League"] = league2
 
-            players_df1["name_year"] = players_df1["Player"] + f" ({year1})"
-            players_df2["name_year"] = players_df2["Player"] + f" ({year2})"
+            stats_processor1.players_df["name_year"] = stats_processor1.players_df["Player"] + f" ({year1})"
+            stats_processor2.players_df["name_year"] = stats_processor2.players_df["Player"] + f" ({year2})"
 
             player1_name_year = f"{player1_name} ({year1})"
             player2_name_year = f"{player2_name} ({year2})"
 
-            # Use shared or merged data
             if year1 == year2 and league1 == league2:
-                stats_processor = StatsProcessor(players_df1)
+                # Use one DataFrame and processor for both players
+                stats_processor = StatsProcessor(stats_processor1.players_df)
                 stats_processor.create_columns()
-                player1_data = players_df1[players_df1["name_year"] == player1_name_year].iloc[0]
-                player2_data = players_df2[players_df2["name_year"] == player2_name_year].iloc[0]
+
+                player1_data = stats_processor.players_df[stats_processor.players_df["name_year"] == player1_name_year].iloc[0]
+                player2_data = stats_processor.players_df[stats_processor.players_df["name_year"] == player2_name_year].iloc[0]
+
             else:
-                combined_df = pd.concat([players_df1, players_df2], ignore_index=True)
+                # Combine processed DataFrames from both processors
+                combined_df = pd.concat([stats_processor1.players_df, stats_processor2.players_df], ignore_index=True)
                 stats_processor = StatsProcessor(combined_df)
                 stats_processor.create_columns()
-                player1_data = combined_df[combined_df["name_year"] == player1_name_year].iloc[0]
-                player2_data = combined_df[combined_df["name_year"] == player2_name_year].iloc[0]
+
+                player1_data = stats_processor.players_df[stats_processor.players_df["name_year"] == player1_name_year].iloc[0]
+                player2_data = stats_processor.players_df[stats_processor.players_df["name_year"] == player2_name_year].iloc[0]
 
             player1_stats_norm = stats_processor.get_normalized_stats(player1_data, selected_stats)
             player2_stats_norm = stats_processor.get_normalized_stats(player2_data, selected_stats)
@@ -143,6 +156,7 @@ class PlayerComparisonApp:
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
+
 
 
 
