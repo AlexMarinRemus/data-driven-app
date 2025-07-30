@@ -109,6 +109,13 @@ class PlayerComparisonApp:
             player1_stats_real = player1_data[selected_stats]
             player2_stats_real = player2_data[selected_stats]
 
+            st.write("DEBUG:", {
+                    "Normalized": [player1_stats_norm.to_dict(), player2_stats_norm.to_dict()],
+                    "Real": [player1_stats_real.to_dict(), player2_stats_real.to_dict()],
+                    "Players": [player1_name_year, player2_name_year],
+                    "Stats": selected_stats
+                })
+
             RadarChartPlotter.plot(
                 [player1_stats_norm, player2_stats_norm],
                 [player1_stats_real, player2_stats_real],
